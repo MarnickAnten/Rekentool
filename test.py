@@ -24,14 +24,14 @@ opslag = np.asarray(Input_specificaties.iloc[209:])[:,1] # Andere opties: 105:20
 # Franchise = Input_pensioenbeleid[1][1]
 
 with st.form("my_form"):
-    Franchise = st.number_input('Franchise:', 0, 400000)    
-    VasteKosten = st.number_input('Vaste Kosten (euro):', 0, 1000000)
-    VermogensKosten = st.number_input('Vermogenskosten (%):', 0, 100)    
+    Franchise = st.number_input('Franchise per jaar:', 0, 1000000000000)    
+    VasteKosten = st.number_input('Vaste kosten per jaar (euro):', 0, 1000000)
+    VermogensKosten = st.number_input('Vermogenskosten per jaar (%):', 0, 100)/100
     Pensioenleeftijd = st.number_input('Pensioenleeftijd:', 0, 100)
-    StartSalaris = st.number_input('StartSalaris:', 0, 10000000)
-    n_scenarios = st.number_input('Scenario aantal:', 0, 20000)
+    StartSalaris = st.number_input('StartSalaris jaar:', 0, 10000000)
+    n_scenarios = st.number_input('Scenario aantal:', 0, 5000)
     lft = st.number_input('Leeftijd deelnemer:', 1, 100)
-    V_0 = st.number_input('Startvermogen:', 0, 10000000000000)
+    V_0 = st.number_input('Startvermogen:', 0, 1000000000000)
 
     submitted = st.form_submit_button("Submit")
     # if submitted:
@@ -96,7 +96,7 @@ def bereken_a(lft, t, Pensioenleeftijd, q, r, s, t0 = 0): #Duidelijkere naam gev
     return a
 
 #Plot waaier obv vermogensverloop en parameters
-def plot_waaier(vermogen, Pensioenleeftijd, lft, Percentielen):
+def plot_waaier(vermogen, Pensioenleeftijd, Percentielen):
     scenariobedragen_opbouw = vermogen[:, 0:(Pensioenleeftijd)]
     kolom_sort = np.take_along_axis(scenariobedragen_opbouw, np.argsort(scenariobedragen_opbouw, axis = 0), axis = 0)
     x = np.arange(0, kolom_sort.shape[1], 1)
@@ -135,7 +135,7 @@ def verloop_vermogen(rentetermijnstructuren, Aandelenrendement, rendement_obliga
             else: 
                 a = bereken_a(lft, t, Pensioenleeftijd, q, rentetermijnstructuren, s)
                 uitkering = V_t/a
-                premie = Premie_percentage * (loonverloop[t] - franchiseverloop[t]) - VasteKosten
+                premie = Premie_percentage * (loonverloop[t + t0] - franchiseverloop[t + t0]) - VasteKosten
                 V_t = V(V_t, premie, 0, alph, Aandelenrendement[:, t0:], rendement_obligaties[:, t0:], s, t, p) * (1 - VermogensKosten)
             # Sla vermogens en uitkeringen op
             vermogen[s, t + lft] = V_t
@@ -185,20 +185,26 @@ for s in range(n_scenarios):
             a = bereken_a(lft, t, Pensioenleeftijd, q, rentetermijnstructuren_nominaal, s, t0)
             atjes[s, t] = a
             uitkering = V_t/a
-            premie = 0
-            V_t = V(V_t, premie, uitkering, alph, Aandelenrendement[:, t0:], rendement_obligaties[:, t0:], s, t, p)
+            premie = -VasteKosten
+            V_t = V(V_t, premie, uitkering, alph, Aandelenrendement[:, t0:], rendement_obligaties[:, t0:], s, t, p) * (1 - VermogensKosten)
         else: 
             a = bereken_a(lft, t, Pensioenleeftijd, q, rentetermijnstructuren_nominaal, s, t0)
             atjes[s, t] = a
             uitkering = V_t/a
-            premie = Premie_percentage * (loonverloop[lft + t - min_lft] - Franchise)
-            V_t = V(V_t, premie, 0, alph, Aandelenrendement[:, t0:], rendement_obligaties[:, t0:], s, t, p)
+            premie = Premie_percentage * (loonverloop[t + t0] - franchiseverloop[t + t0]) - VasteKosten
+            V_t = V(V_t, premie, 0, alph, Aandelenrendement[:, t0:], rendement_obligaties[:, t0:], s, t, p) * (1 - VermogensKosten)
         # Sla vermogens en uitkeringen op
         vermogen[s, t + lft] = V_t
         uitkeringen[s, t + lft] = uitkering
 
-UPOwaardes = plot_waaier(vermogen, Pensioenleeftijd, lft, [0.05, 0.5, 0.95])
+nav_vermogen = plot_waaier(vermogen, Pensioenleeftijd, [0.05, 0.5, 0.95])
 
-data = pd.DataFrame(UPOwaardes, columns = ["Slecht weer", "Verwacht", "Goed weer"])
+data_vermogen = pd.DataFrame(nav_vermogen, columns = ["Slecht weer", "Verwacht", "Goed weer"])
 
-st.line_chart(data, x_label = "Leeftijd deelnemer", y_label = "Geprojecteerd vermogen")
+st.line_chart(data_vermogen, x_label = "Leeftijd deelnemer", y_label = "Geprojecteerd vermogen")
+
+nav_uitkeringen = plot_waaier(uitkeringen, Pensioenleeftijd, [0.05, 0.5, 0.95])
+
+data_uitkeringen = pd.DataFrame(nav_uitkeringen, columns = ["Slecht weer", "Verwacht", "Goed weer"])
+
+st.line_chart(data_uitkeringen, x_label = "Leeftijd deelnemer", y_label = "Geprojecteerde uitkering")
