@@ -166,10 +166,7 @@ uitkeringen = np.zeros([n_scenarios, n_jaren])
 for s in range(n_scenarios):
     V_t = V_0
     for t in range(n_jaren - lft):
-        if Gebruik_Ervaringssterfte:
-            p = 1 - q[lft + t, t] * Ervaringssterfte_dlr[lft + t]
-        else:
-            p = 1 - q[lft + t, t]
+        p = 1 - q[lft + t, t] * Ervaringssterfte_dlr[lft + t]
         alph = alpha[lft + t - min_lft]
         # alph = 0.3
         if lft + t >= Pensioenleeftijd:
