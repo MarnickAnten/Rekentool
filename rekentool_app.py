@@ -32,7 +32,7 @@ with st.form("my_form"):
     n_scenarios = st.number_input('Scenario aantal:', 1, 5000)
     lft = st.number_input('Leeftijd deelnemer:', 1, 100)
     V_0 = st.number_input('Startvermogen:', 0, 1000000000000)
-    PremiePercentage = st.number_input('Premiepercentage:', 0, 100)
+    PremiePercentage = st.number_input('Premiepercentage:', 0, 100)/100
 
     submitted = st.form_submit_button("Submit")
     
