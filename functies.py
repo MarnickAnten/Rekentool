@@ -25,7 +25,7 @@ def bereken_a(lft, t, Pensioenleeftijd, q, r, s, t0 = 0): #Duidelijkere naam gev
     return a
 
 #Plot waaier obv vermogensverloop en parameters
-def plot_waaier(vermogen, Pensioenleeftijd, lft, Percentielen):
+def plot_waaier(vermogen, Pensioenleeftijd, Percentielen):
     scenariobedragen_opbouw = vermogen[:, 0:(Pensioenleeftijd)]
     kolom_sort = np.take_along_axis(scenariobedragen_opbouw, np.argsort(scenariobedragen_opbouw, axis = 0), axis = 0)
     x = np.arange(0, kolom_sort.shape[1], 1)
