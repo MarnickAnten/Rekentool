@@ -32,7 +32,7 @@ with st.form("my_form"):
     n_scenarios = st.number_input('Scenario aantal:', 1, 5000)
     lft = st.number_input('Leeftijd deelnemer:', 1, 100)
     V_0 = st.number_input('Startvermogen:', 0, 1000000000000)
-    premie_percentage = st.number_input('Premiepercentage:', 0, 100)
+    PremiePercentage = st.number_input('Premiepercentage:', 0, 100)
 
     submitted = st.form_submit_button("Submit")
     
@@ -168,7 +168,7 @@ for s in range(n_scenarios):
     for t in range(n_jaren - lft):
         p = 1 - q[lft + t, t] * Ervaringssterfte_dlr[lft + t]
         alph = alpha[lft + t - min_lft]
-        # alph = 0.3
+
         if lft + t >= Pensioenleeftijd:
             a = bereken_a(lft, t, Pensioenleeftijd, q, rentetermijnstructuren_nominaal, s, t0)
             atjes[s, t] = a
@@ -179,7 +179,7 @@ for s in range(n_scenarios):
             a = bereken_a(lft, t, Pensioenleeftijd, q, rentetermijnstructuren_nominaal, s, t0)
             atjes[s, t] = a
             uitkering = V_t/a
-            premie = Premie_percentage * (loonverloop[t + t0] - franchiseverloop[t + t0]) - VasteKosten
+            premie = PremiePercentage * (loonverloop[t + t0] - franchiseverloop[t + t0]) - VasteKosten
             V_t = V(V_t, premie, 0, alph, Aandelenrendement[:, t0:], rendement_obligaties[:, t0:], s, t, p) * (1 - VermogensKosten)
         # Sla vermogens en uitkeringen op
         vermogen[s, t + lft] = V_t

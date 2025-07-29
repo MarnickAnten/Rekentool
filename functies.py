@@ -43,7 +43,7 @@ def plot_waaier(vermogen, Pensioenleeftijd, Percentielen):
 #Bereken verloop van vermogen obv o.a. rentetermijnstructuren, rendementen op obligaties. 
 # Optioneel argument t0 verzet Aandelenrendement en rendement_obligaties
 def verloop_vermogen(rentetermijnstructuren, Aandelenrendement, rendement_obligaties, loonverloop, franchiseverloop,
-                     alpha, q, Pensioenleeftijd, lft, n_jaren, n_scenarios, V_0, Premie_percentage, VasteKosten, VermogensKosten, t0 = 0):
+                     alpha, q, Pensioenleeftijd, lft, n_jaren, n_scenarios, V_0, PremiePercentage, VasteKosten, VermogensKosten, t0 = 0):
     # Initiele waardes
     vermogen = np.zeros([n_scenarios, n_jaren])
     vermogen[:, lft - 1] = V_0
@@ -61,7 +61,7 @@ def verloop_vermogen(rentetermijnstructuren, Aandelenrendement, rendement_obliga
             else: 
                 a = bereken_a(lft, t, Pensioenleeftijd, q, rentetermijnstructuren, s)
                 uitkering = V_t/a
-                premie = Premie_percentage * (loonverloop[t] - franchiseverloop[t]) - VasteKosten # Idee hier is dat 'startloon' op 'lft' is.
+                premie = PremiePercentage * (loonverloop[t] - franchiseverloop[t]) - VasteKosten # Idee hier is dat 'startloon' op 'lft' is.
                 V_t = V(V_t, premie, 0, alph, Aandelenrendement[:, t0:], rendement_obligaties[:, t0:], s, t, p) * (1 - VermogensKosten)
             # Sla vermogens en uitkeringen op
             vermogen[s, t + lft] = V_t
